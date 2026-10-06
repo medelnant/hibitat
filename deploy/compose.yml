@@ -1,0 +1,22 @@
+# Production Postgres on the VPS. Lives at /root/hibitat/compose.yml next to a .env file
+# holding POSTGRES_PASSWORD. Bound to localhost only: Docker port rules bypass ufw.
+services:
+  db:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: hibitat
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: hibitat
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - hibitat-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hibitat -d hibitat"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+
+volumes:
+  hibitat-db:
