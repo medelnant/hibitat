@@ -8,6 +8,8 @@ BRANCH="${HIBITAT_BRANCH:-main}"
 
 ssh "$HOST" BRANCH="$BRANCH" 'bash -s' <<'REMOTE'
 set -euo pipefail
+# HIBITAT's own Node 24; the system Node 20 belongs to the portfolio.
+export PATH=/opt/node-24/bin:$PATH
 cd /var/www/hibitat
 git fetch --quiet origin "$BRANCH"
 git checkout --quiet "$BRANCH"

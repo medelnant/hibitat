@@ -24,6 +24,7 @@ from Postgres, so the database must be up, and the script makes sure it is) and 
 | What | Where |
 |---|---|
 | App checkout | `/var/www/hibitat` (cloned from GitHub via the `github-hibitat` SSH alias) |
+| Node | `/opt/node-24` (24.x, side by side; `/usr/bin/node` stays 20 for the portfolio) |
 | App env | `/var/www/hibitat/.env.local` (`DATABASE_URL`) |
 | Postgres | `/root/hibitat/compose.yml`, password in `/root/hibitat/.env` |
 | Basic auth login | `/root/hibitat/basic-auth.txt` (hash in `/etc/nginx/.htpasswd-hibitat`) |
@@ -34,6 +35,7 @@ from Postgres, so the database must be up, and the script makes sure it is) and 
 ## Handy commands (on the VPS)
 
 ```bash
+export PATH=/opt/node-24/bin:$PATH     # before any npm/npx command for hibitat
 pm2 logs hibitat                       # app logs
 pm2 restart hibitat
 cat /root/hibitat/basic-auth.txt       # site login
@@ -50,6 +52,7 @@ or `openssl passwd -apr1`, then update `basic-auth.txt`.
 2. Basic auth file, crontab entry for `backup.sh`, deploy key plus `github-hibitat` host in `/root/.ssh/config`.
 3. `deploy/nginx-hibitat.conf` → `/etc/nginx/sites-available/hibitat`, symlinked into `sites-enabled`, `nginx -t && systemctl reload nginx`.
 4. DNS: Route 53 `A hibitat.visualaesthetic.com → 46.202.177.53`.
-5. `git clone github-hibitat:<owner>/<repo>.git /var/www/hibitat`, write `.env.local`,
-   `npm ci && npm run db:migrate && npm run db:seed && npm run build`, `pm2 start deploy/ecosystem.config.cjs && pm2 save`.
-6. `certbot --nginx -d hibitat.visualaesthetic.com` (adds TLS and the HTTP→HTTPS redirect to the nginx site).
+5. Node 24 tarball from nodejs.org (checksum verified) into `/opt/node-v24.x-linux-x64`, symlinked as `/opt/node-24`.
+6. `git clone github-hibitat:<owner>/<repo>.git /var/www/hibitat`, write `.env.local`,
+   with `/opt/node-24/bin` first on `PATH`: `npm ci && npm run db:migrate && npm run db:seed && npm run build`, `pm2 start deploy/ecosystem.config.cjs && pm2 save`.
+7. `certbot --nginx -d hibitat.visualaesthetic.com` (adds TLS and the HTTP→HTTPS redirect to the nginx site).
